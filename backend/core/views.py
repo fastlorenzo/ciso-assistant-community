@@ -27,6 +27,7 @@ import django_filters as df
 from ciso_assistant.settings import (
     EMAIL_HOST,
     EMAIL_HOST_RESCUE,
+    ZIPFILE_TEMP_DIRECTORY,
 )
 
 import shutil
@@ -4622,7 +4623,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             compliance_assessment = self.get_object()
             (index_content, evidences) = generate_html(compliance_assessment)
             zip_name = f"{compliance_assessment.name.replace('/', '-')}-{compliance_assessment.framework.name.replace('/', '-')}-{datetime.now().strftime('%Y-%m-%d-%H-%M')}.zip"
-            with zipfile.ZipFile(zip_name, "w") as zipf:
+            zip_path_name = os.path.join(ZIPFILE_TEMP_DIRECTORY, zip_name)
+            with zipfile.ZipFile(zip_path_name, "w") as zipf:
                 for evidence in evidences:
                     if evidence.attachment:
                         if default_storage.exists(evidence.attachment.name):
@@ -4635,9 +4637,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                             )
                 zipf.writestr("index.html", index_content)
 
-            response = FileResponse(open(zip_name, "rb"), as_attachment=True)
+            response = FileResponse(open(zip_path_name, "rb"), as_attachment=True)
             response["Content-Disposition"] = f'attachment; filename="{zip_name}"'
-            os.remove(zip_name)
+            os.remove(zip_path_name)
             return response
         else:
             return Response({"error": "Permission denied"})
