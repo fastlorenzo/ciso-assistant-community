@@ -3,12 +3,13 @@
 import json
 from typing import Optional
 
+from ..config import make_request, format_table
+
 
 def register_security_tools(mcp):
     """Register security tools with the MCP server"""
-    
+
     # Import here to avoid circular imports
-    from ..config import make_request, format_table
 
     @mcp.tool()
     async def get_security_measures(folder_id: Optional[str] = None):

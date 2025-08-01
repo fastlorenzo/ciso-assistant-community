@@ -10,4 +10,6 @@ dependencies = [
     "pyyaml>=6.0.2",
     "requests>=2.32.3",
     "mcpo==0.0.16",
+    "python-dotenv>=1.0.0",
+    "rich>=13.0.0",
 ]

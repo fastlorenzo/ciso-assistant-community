@@ -1,14 +1,14 @@
 """EBIOS-RM module for CISO Assistant MCP Server"""
 
-import json
 from typing import Optional
+
+from ..config import make_request, format_table
 
 
 def register_ebios_tools(mcp):
     """Register EBIOS-RM tools with the MCP server"""
-    
+
     # Import here to avoid circular imports
-    from ..config import make_request, format_table
 
     @mcp.tool()
     async def get_ebios_studies(folder_id: Optional[str] = None):

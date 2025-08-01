@@ -3,3 +3,4 @@ config.yaml
 .config.yaml
 .clica_config.yaml
 .mcp.env
+.ruff_cache

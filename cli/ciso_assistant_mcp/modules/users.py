@@ -3,12 +3,11 @@
 import json
 from typing import Optional
 
+from ..config import make_request, format_table
+
 
 def register_users_tools(mcp):
     """Register users and access tools with the MCP server"""
-    
-    # Import here to avoid circular imports
-    from ..config import make_request, format_table
 
     @mcp.tool()
     async def get_users():
@@ -69,7 +68,8 @@ def register_users_tools(mcp):
         """Get members of user groups
 
         Args:
-            group_name: Optional group name to filter, if not provided returns all groups with members
+            group_name: Optional group name to filter, if not provided returns
+                all groups with members
         """
         groups_result = make_request("user-groups/")
         if "error" in groups_result:

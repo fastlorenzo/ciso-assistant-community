@@ -2,6 +2,7 @@
 
 import json
 from typing import Optional
+
 from ..config import make_request, format_table
 
 
@@ -9,7 +10,9 @@ def register_risk_tools(mcp):
     """Register risk management tools with the MCP server"""
 
     @mcp.tool()
-    async def get_risk_scenarios(folder_id: Optional[str] = None, format_as_table: bool = False):
+    async def get_risk_scenarios(
+        folder_id: Optional[str] = None, format_as_table: bool = False
+    ):
         """Get risk scenarios from CISO Assistant Risk Registry
 
         Args:
@@ -26,13 +29,21 @@ def register_risk_tools(mcp):
             return "No risk scenarios found"
 
         if format_as_table:
-            columns = ["name", "description", "current_level", "residual_level", "folder"]
+            columns = [
+                "name",
+                "description",
+                "current_level",
+                "residual_level",
+                "folder",
+            ]
             return format_table(result["results"], columns)
 
         return json.dumps(result, indent=2)
 
     @mcp.tool()
-    async def get_risk_assessments(folder_id: Optional[str] = None, format_as_table: bool = False):
+    async def get_risk_assessments(
+        folder_id: Optional[str] = None, format_as_table: bool = False
+    ):
         """Get risk assessments
 
         Args:

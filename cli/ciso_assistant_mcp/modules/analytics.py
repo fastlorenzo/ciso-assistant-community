@@ -3,13 +3,13 @@
 import json
 from typing import Optional
 import requests
+from ..config import make_request, API_URL
 
 
 def register_analytics_tools(mcp):
     """Register analytics and utilities tools with the MCP server"""
-    
+
     # Import here to avoid circular imports
-    from ..config import make_request, format_table, API_URL
 
     @mcp.tool()
     async def get_compliance_summary(folder_id: Optional[str] = None):
@@ -22,8 +22,14 @@ def register_analytics_tools(mcp):
         audits_params = {"folder": folder_id} if folder_id else {}
         controls_params = {"folder": folder_id} if folder_id else {}
 
-        audits_result = make_request("compliance-assessments/", params=audits_params)
-        controls_result = make_request("applied-controls/", params=controls_params)
+        audits_result = make_request(
+            "compliance-assessments/",
+            params=audits_params,
+        )
+        controls_result = make_request(
+            "applied-controls/",
+            params=controls_params,
+        )
 
         summary = {
             "total_audits": len(audits_result.get("results", [])),
@@ -53,8 +59,9 @@ def register_analytics_tools(mcp):
         """Search across CISO Assistant items
 
         Args:
-            query: Search term
-            item_type: Type of items to search (controls, risks, audits, assets, all)
+            query: Search term to look for
+            item_type: Type of items to search (controls, risks, audits,
+                assets, all)
         """
         results = {}
 
@@ -67,7 +74,11 @@ def register_analytics_tools(mcp):
         }
 
         search_endpoints = (
-            endpoints if item_type == "all" else {item_type: endpoints.get(item_type)}
+            endpoints
+            if item_type == "all"
+            else {
+                item_type: endpoints.get(item_type),
+            }
         )
 
         for name, endpoint in search_endpoints.items():
@@ -122,7 +133,8 @@ def register_analytics_tools(mcp):
         """Get detailed information for any object by its ID
 
         Args:
-            object_type: Type of object (e.g., applied-controls, risk-scenarios, assets, etc.)
+            object_type: Type of object (e.g., applied-controls,
+                risk-scenarios, assets, etc.)
             object_id: ID of the object to retrieve
         """
         result = make_request(f"{object_type}/{object_id}/")
@@ -147,11 +159,15 @@ def register_analytics_tools(mcp):
         """Get CISO Assistant system information"""
         try:
             # Try to get version info or any system endpoint
-            result = make_request("folders/")  # Use a basic endpoint to test connectivity
+            result = make_request(
+                "folders/"
+            )  # Use a basic endpoint to test connectivity
             if "error" in result:
                 return f"Error connecting to CISO Assistant: {result['error']}"
 
-            return f"✅ Connected to CISO Assistant at {API_URL}\n📊 System is operational"
+            return (
+                f"✅ Connected to CISO Assistant at {API_URL}\n📊 System is operational"
+            )
         except requests.RequestException as e:
             return f"❌ Connection failed: {str(e)}"
 
@@ -242,7 +258,8 @@ def register_analytics_tools(mcp):
         }
 
         result = "# 📋 CISO Assistant MCP Tools Reference\n\n"
-        result += f"**Total Tools Available**: {sum(len(tools) for tools in tools_info.values())}\n\n"
+        total_tools = sum(len(tools) for tools in tools_info.values())
+        result += f"**Total Tools Available**: {total_tools}\n\n"
 
         for category, tools in tools_info.items():
             result += f"## {category}\n"
@@ -252,7 +269,8 @@ def register_analytics_tools(mcp):
 
         result += "---\n"
         result += "💡 **Tips**: \n"
-        result += "- Most tools accept optional `folder_id` parameter for filtering\n"
+        result += "- Most tools accept optional `folder_id` parameter for "
+        result += "filtering\n"
         result += "- Use `get_folders` first to find folder IDs\n"
         result += "- Use `get_object_by_id` for detailed object information\n"
         result += "- Use `search_items` for cross-entity searching\n"

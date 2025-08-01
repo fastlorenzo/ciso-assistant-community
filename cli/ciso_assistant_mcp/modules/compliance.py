@@ -3,23 +3,28 @@
 import json
 from typing import Optional
 
+from ..config import make_request, format_table
+
 
 def register_compliance_tools(mcp):
     """Register compliance and audit tools with the MCP server"""
-    
+
     # Import here to avoid circular imports
-    from ..config import make_request, format_table
 
     @mcp.tool()
     async def get_applied_controls(
-        folder_id: Optional[str] = None, status: Optional[str] = None, format_as_table: bool = False
+        folder_id: Optional[str] = None,
+        status: Optional[str] = None,
+        format_as_table: bool = False,
     ):
         """Get applied controls from CISO Assistant action plan
 
         Args:
             folder_id: Optional folder ID to filter results
-            status: Optional status filter (to_do, in_progress, active, deprecated)
-            format_as_table: If True, return formatted table; if False, return raw JSON
+            status: Optional status filter (to_do, in_progress, active,
+                deprecated)
+            format_as_table: If True, return formatted table; if False, return
+                raw JSON
         """
         params = {}
         if folder_id:
@@ -112,16 +117,19 @@ def register_compliance_tools(mcp):
 
         audit_info = audit_result
         result_text = f"## 🔍 {audit_info.get('name', 'Unknown Audit')}\n"
-        result_text += (
-            f"**Framework:** {audit_info.get('framework', {}).get('str', 'N/A')}\n"
-        )
+        framework_str = audit_info.get("framework", {}).get("str", "N/A")
+        result_text += f"**Framework:** {framework_str}\n"
         result_text += f"**Status:** {audit_info.get('status', 'N/A')}\n"
         result_text += f"**Progress:** {audit_info.get('progress', 0)}%\n"
-        result_text += f"**Description:** {audit_info.get('description', 'N/A')}\n\n"
+        description = audit_info.get("description", "N/A")
+        result_text += f"**Description:** {description}\n\n"
 
         # Get requirement assessments for this audit
         req_params = {"compliance_assessment": audit_id}
-        req_result = make_request("requirement-assessments/", params=req_params)
+        req_result = make_request(
+            "requirement-assessments/",
+            params=req_params,
+        )
 
         if "error" not in req_result and req_result.get("results"):
             result_text += "### 📋 Requirements Status:\n\n"
@@ -133,7 +141,8 @@ def register_compliance_tools(mcp):
                 status_counts[status] = status_counts.get(status, 0) + 1
 
                 # Show individual requirements
-                result_text += f"**{req.get('name', 'Unknown Requirement')}**\n"
+                req_name = req.get("name", "Unknown Requirement")
+                result_text += f"**{req_name}**\n"
                 result_text += f"- Status: {status}\n"
                 result_text += f"- Score: {score}\n"
                 if req.get("comment"):
@@ -162,12 +171,14 @@ def register_compliance_tools(mcp):
                 status = control.get("status", "unknown")
                 control_status_counts[status] = control_status_counts.get(status, 0) + 1
 
-                result_text += f"**{control.get('name', 'Unknown Control')}**\n"
+                control_name = control.get("name", "Unknown Control")
+                result_text += f"**{control_name}**\n"
                 result_text += f"- Status: {status}\n"
                 if control.get("eta"):
                     result_text += f"- ETA: {control.get('eta')}\n"
                 if control.get("description"):
-                    result_text += f"- Description: {control.get('description')}\n"
+                    description = control.get("description")
+                    result_text += f"- Description: {description}\n"
                 result_text += "\n"
 
             # Controls summary
@@ -209,7 +220,8 @@ def register_compliance_tools(mcp):
             return f"Error: {req_result['error']}"
 
         if not req_result.get("results"):
-            return f"No requirements found for audit '{audit_found.get('name')}'"
+            audit_name = audit_found.get("name")
+            return f"No requirements found for audit '{audit_name}'"
 
         columns = ["name", "status", "score", "comment", "evidence"]
         return format_table(req_result["results"], columns)
@@ -254,7 +266,8 @@ def register_compliance_tools(mcp):
         Args:
             assessment_id: ID of the compliance assessment
         """
-        result = make_request(f"compliance-assessments/{assessment_id}/donut_data/")
+        endpoint = f"compliance-assessments/{assessment_id}/donut_data/"
+        result = make_request(endpoint)
 
         if "error" in result:
             return f"Error: {result['error']}"
@@ -268,7 +281,8 @@ def register_compliance_tools(mcp):
         Args:
             assessment_id: ID of the compliance assessment
         """
-        result = make_request(f"compliance-assessments/{assessment_id}/progress_ts/")
+        endpoint = f"compliance-assessments/{assessment_id}/progress_ts/"
+        result = make_request(endpoint)
 
         if "error" in result:
             return f"Error: {result['error']}"
@@ -296,7 +310,8 @@ def register_compliance_tools(mcp):
         Args:
             assessment_id: ID of the compliance assessment
         """
-        result = make_request(f"compliance-assessments/{assessment_id}/quality_check/")
+        endpoint = f"compliance-assessments/{assessment_id}/quality_check/"
+        result = make_request(endpoint)
 
         if "error" in result:
             return f"Error: {result['error']}"

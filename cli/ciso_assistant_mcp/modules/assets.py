@@ -3,12 +3,11 @@
 import json
 from typing import Optional
 
+from ..config import make_request, format_table
+
 
 def register_assets_tools(mcp):
     """Register assets and projects tools with the MCP server"""
-    
-    # Import here to avoid circular imports
-    from ..config import make_request, format_table
 
     @mcp.tool()
     async def get_assets(folder_id: Optional[str] = None):
